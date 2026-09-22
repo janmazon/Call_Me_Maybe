@@ -7,3 +7,4 @@ data/output/*
 !data/output/.gitkeep
 .hf_cache/
 .uv_cache/
+prueba.py
