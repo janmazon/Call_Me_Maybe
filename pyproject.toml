@@ -1,10 +1,10 @@
 [project]
 name = "call-me-maybe"
 version = "0.1.0"
-description = "Add your description here"
+description = "Introduction to function calling in LLMs"
 readme = "README.md"
 authors = [
-    { name = "janmazon", email = "jaaanire@gmail.com" }
+    { name = "janmazon", email = "janmazon07@gmail.com" }
 ]
 requires-python = ">=3.13"
 dependencies = [
@@ -27,3 +27,6 @@ members = [
 
 [tool.uv.sources]
 llm-sdk = { workspace = true, editable = true }
+
+[tool.uv]
+package = false
