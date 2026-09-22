@@ -2,4 +2,8 @@
 __pycache__/
 *.pyc
 .mypy_cache/
-data/output/
+.pytest_cache/
+data/output/*
+!data/output/.gitkeep
+.hf_cache/
+.uv_cache/
