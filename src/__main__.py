@@ -1,5 +1,7 @@
 import argparse
 from src.data_loader import load_functions, load_tests
+from src.generator import create_prompt
+from llm_sdk import Small_LLM_Model
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -27,10 +29,6 @@ def main() -> None:
     args = parse_arguments()
     functions = load_functions(args.functions_definition)
     tests = load_tests(args.input)
-    print(f"Loaded {len(functions)} functions.")
-    print(f"First function: {functions[0].name}")
-    print(f"Loaded {len(tests)} tests.")
-    print(f"First test: {tests[0].prompt}")
 
 
 if __name__ == "__main__":
