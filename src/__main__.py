@@ -1,4 +1,5 @@
 import argparse
+from src.data_loader import load_functions, load_tests
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -24,9 +25,12 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_arguments()
-    print(args.functions_definition)
-    print(args.input)
-    print(args.output)
+    functions = load_functions(args.functions_definition)
+    tests = load_tests(args.input)
+    print(f"Loaded {len(functions)} functions.")
+    print(f"First function: {functions[0].name}")
+    print(f"Loaded {len(tests)} tests.")
+    print(f"First test: {tests[0].prompt}")
 
 
 if __name__ == "__main__":
