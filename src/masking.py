@@ -1,6 +1,6 @@
-import numpy as np
-from llm_sdk.llm_sdk import Small_LLM_Model
+from llm_sdk import Small_LLM_Model
 from src.models import FunctionDefinition
+from typing import Any
 
 
 def get_allowed_tokens(candidates: list[list[int]],
@@ -15,11 +15,22 @@ def get_allowed_tokens(candidates: list[list[int]],
     return allowed_token_ids
 
 
-def apply_logit_mask(logits: np.ndarray, allowed_token_ids: list[int]) -> int:
-    logits_array = np.asarray(logits, dtype=np.float32).flatten()
-    mask = np.full_like(logits_array, -np.inf)
-    mask[allowed_token_ids] = logits_array[allowed_token_ids]
-    return int(np.argmax(mask))
+def apply_logit_mask(logits: list[Any], allowed_token_ids: list[int]) -> int:
+    if logits and isinstance(logits[0], list):
+        last_logits = logits[-1]
+    else:
+        last_logits = logits
+
+    best_token = allowed_token_ids[0]
+    best_score = last_logits[best_token]
+
+    for token_id in allowed_token_ids:
+        score = last_logits[token_id]
+        if score > best_score:
+            best_score = score
+            best_token = token_id
+
+    return best_token
 
 
 def select_function(
@@ -33,7 +44,11 @@ def select_function(
     generated_tokens: list[int] = []
 
     for function in functions:
-        tokens: list[int] = model.encode(function.name).tolist()
+        raw_tokens = model.encode(function.name).tolist()
+        if raw_tokens and isinstance(raw_tokens[0], list):
+            tokens = raw_tokens[0]
+        else:
+            tokens = raw_tokens
         candidates.append(tokens)
         function_by_tokens[tuple(tokens)] = function
 
@@ -41,10 +56,11 @@ def select_function(
         allowed = get_allowed_tokens(candidates, generated_tokens)
         if not allowed:
             break
-        logits = np.array(model.get_logits_from_input_ids(current_input_ids))
+        logits = model.get_logits_from_input_ids(current_input_ids)
         next_token = apply_logit_mask(logits, allowed)
         generated_tokens.append(next_token)
         current_input_ids.append(next_token)
 
     selected_function = function_by_tokens[tuple(generated_tokens)]
+
     return selected_function, current_input_ids
