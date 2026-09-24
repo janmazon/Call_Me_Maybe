@@ -6,19 +6,14 @@ readme = "README.md"
 authors = [
     { name = "janmazon", email = "jcamarer@student.42urduliz.com" }
 ]
+
 requires-python = ">=3.10"
+
 dependencies = [
     "llm-sdk",
     "numpy>=1.24",
     "pydantic>=2.13.5",
 ]
-
-[project.scripts]
-call-me-maybe = "call_me_maybe:main"
-
-[build-system]
-requires = ["uv_build>=0.12.10,<0.13.0"]
-build-backend = "uv_build"
 
 [tool.uv.workspace]
 members = [

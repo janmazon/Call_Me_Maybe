@@ -8,3 +8,4 @@ data/output/*
 .hf_cache/
 .uv_cache/
 prueba.py
+.python-version
