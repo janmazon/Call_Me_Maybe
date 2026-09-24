@@ -1,7 +1,5 @@
 import argparse
 from src.data_loader import load_functions, load_tests
-from src.generator import create_prompt
-from llm_sdk import Small_LLM_Model
 
 
 def parse_arguments() -> argparse.Namespace:
