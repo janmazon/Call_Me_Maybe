@@ -3,7 +3,6 @@ from llm_sdk import Small_LLM_Model
 from src.data_loader import load_functions, load_tests
 from src.generator import create_prompt
 from src.masking import select_function
-from src.models import FunctionCallResult
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -32,7 +31,6 @@ def main() -> None:
     functions = load_functions(args.functions_definition)
     tests = load_tests(args.input)
     model = Small_LLM_Model()
-    results: list[FunctionCallResult] = []
     for test in tests:
         prompt = create_prompt(functions, test.prompt)
         raw_input_ids = model.encode(prompt).tolist()

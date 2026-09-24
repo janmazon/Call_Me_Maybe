@@ -22,3 +22,11 @@ members = [
 
 [tool.uv.sources]
 llm-sdk = { workspace = true, editable = true }
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "llm_sdk"
+ignore_missing_imports = true
+follow_imports = "skip"
