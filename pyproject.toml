@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Introduction to function calling in LLMs"
 readme = "README.md"
 authors = [
-    { name = "janmazon", email = "jcamarer@student.42urduliz.com" }
+    { name = "jcamarer", email = "jcamarer@student.42urduliz.com" }
 ]
 requires-python = ">=3.10"
 
