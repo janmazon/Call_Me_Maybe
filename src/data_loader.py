@@ -1,4 +1,5 @@
 from src.models import FunctionDefinition, TestPrompt
+from llm_sdk import Small_LLM_Model
 import json
 import sys
 
@@ -51,3 +52,15 @@ def load_tests(file_path: str) -> list[TestPrompt]:
         sys.exit(1)
 
     return prompts
+
+
+def load_vocabulary(model: Small_LLM_Model) -> dict[int, str]:
+    vocab_path = model.get_path_to_vocab_file()
+    with open(vocab_path, "r") as f:
+        vocab = json.load(f)
+
+        inverted_vocab: dict[int, str] = {}
+        for string_token, num_id in vocab.items():
+            inverted_vocab[num_id] = string_token
+
+    return inverted_vocab

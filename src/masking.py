@@ -1,7 +1,6 @@
 from llm_sdk import Small_LLM_Model
 from src.models import FunctionDefinition
 from typing import Any
-import json
 import re
 
 
@@ -68,61 +67,77 @@ def select_function(
     return selected_function, current_input_ids
 
 
-def load_vocabulary(model: Small_LLM_Model) -> dict[int, str]:
-    vocab_path = model.get_path_to_vocab_file()
-    with open(vocab_path, "r") as f:
-        vocab = json.load(f)
-
-        inverted_vocab: dict[int, str] = {}
-        for string_token, num_id in vocab.items():
-            inverted_vocab[num_id] = string_token
-
-    return inverted_vocab
-
-
 def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
-    remaining_text = proposed_text
-    is_first = True
+    if proposed_text == "":
+        return True
 
-    for param_name, param_def in function.parameters.items():
-        if is_first:
-            expected_text = f'{{"{param_name}": '
-            is_first = False
+    remaining_text = proposed_text.lstrip()
+    if not remaining_text.startswith("{"):
+        return "{".startswith(remaining_text)
+
+    remaining_text = remaining_text[1:].lstrip()
+    if not remaining_text:
+        return True
+
+    param_list = list(function.parameters.items())
+    for index, (param_name, param_def) in enumerate(param_list):
+        if index == 0:
+            expected_struct = f'"{param_name}":'
         else:
-            expected_text = f', "{param_name}": '
+            expected_struct = f',"{param_name}":'
 
-        if len(remaining_text) <= len(expected_text):
-            if expected_text.startswith(remaining_text):
+        text_without_spaces = remaining_text.replace(" ", "")
+        if len(expected_struct) > len(text_without_spaces):
+            if not expected_struct.startswith(text_without_spaces):
+                return False
+            else:
                 return True
-        else:
-            if remaining_text.startswith(expected_text):
-                remaining_text = remaining_text[len(expected_text):]
+
+        if not text_without_spaces.startswith(expected_struct):
+            return False
+
+        chars = 0
+        struct_chars = 0
+        for char in remaining_text:
+            chars += 1
+            if char != " ":
+                struct_chars += 1
+            if struct_chars == len(expected_struct):
+                break
+
+        remaining_text = remaining_text[chars:].lstrip()
+        if not remaining_text:
+            return True
+
+        if param_def.type == "number":
+            partial_regex = r"^-?[0-9]*\.?[0-9]*$"
+            full_regex = r"^-?[0-9]+(\.[0-9]+)?$"
+
+            match = re.match(r"[^,}]+", remaining_text)
+            if match:
+                value = match.group(0)
+                if len(value) == len(remaining_text):
+                    return bool(re.fullmatch(partial_regex, value.strip()))
+                else:
+                    if not re.fullmatch(full_regex, value.strip()):
+                        return False
+                    remaining_text = remaining_text[len(value):].lstrip()
             else:
                 return False
 
-        if param_def.type == "number":
-            number_regex = r"-?[0-9]+(\.[0-9]+)?"
-            match = re.match(number_regex, remaining_text)
-            if match and len(match.group(0)) < len(remaining_text):
-                remaining_text = remaining_text[len(match.group(0)):]
-            else:
-                if re.fullmatch(r"^-?[0-9]*\.?[0-9]*$", remaining_text):
-                    return True
-                else:
-                    return False
-
         elif param_def.type == "string":
-            string_regex = r'"[^"]*"'
-            match = re.match(string_regex, remaining_text)
-            if match and len(match.group(0)) < len(remaining_text):
-                remaining_text = remaining_text[len(match.group(0)):]
+            match = re.match(r'"[^"]*"', remaining_text)
+            if match:
+                value = match.group(0)
+                remaining_text = remaining_text[len(value):].lstrip()
             else:
                 if re.fullmatch(r'^"[^"]*$', remaining_text):
                     return True
                 else:
                     return False
 
-    if remaining_text in ["", "}"]:
+    remaining_text = remaining_text.strip()
+    if remaining_text == "}":
         return True
 
     return False
