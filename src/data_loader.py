@@ -2,6 +2,7 @@ from src.models import FunctionDefinition, TestPrompt
 from llm_sdk import Small_LLM_Model
 import json
 import sys
+import string
 
 
 def load_functions(file_path: str) -> list[FunctionDefinition]:
@@ -64,3 +65,14 @@ def load_vocabulary(model: Small_LLM_Model) -> dict[int, str]:
             inverted_vocab[num_id] = string_token
 
     return inverted_vocab
+
+
+def create_clean_vocabulary(inverted_vocab: dict[int, str]) -> dict[int, str]:
+    allowed_chars: str = (string.ascii_letters + string.digits +
+                          string.punctuation + " \n\t" + "Ġ" + "Ċ")
+    clean_vocab: dict[int, str] = {}
+    for key, token in inverted_vocab.items():
+        if all(char in allowed_chars for char in token):
+            clean_vocab[key] = token
+
+    return clean_vocab
