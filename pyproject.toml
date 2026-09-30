@@ -4,21 +4,21 @@ version = "0.1.0"
 description = "Introduction to function calling in LLMs"
 readme = "README.md"
 authors = [
-    { name = "janmazon", email = "janmazon07@gmail.com" }
+    { name = "jcamarer", email = "jcamarer@student.42urduliz.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.10"
+
 dependencies = [
     "llm-sdk",
-    "numpy>=2.5.3",
+    "numpy>=1.24",
     "pydantic>=2.13.5",
 ]
 
-[project.scripts]
-call-me-maybe = "call_me_maybe:main"
-
-[build-system]
-requires = ["uv_build>=0.12.17,<0.13.0"]
-build-backend = "uv_build"
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "flake8>=7.3.0",
+]
 
 [tool.uv.workspace]
 members = [
@@ -28,5 +28,10 @@ members = [
 [tool.uv.sources]
 llm-sdk = { workspace = true, editable = true }
 
-[tool.uv]
-package = false
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = "llm_sdk"
+ignore_missing_imports = true
+follow_imports = "skip"
