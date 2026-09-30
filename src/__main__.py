@@ -2,7 +2,7 @@ import argparse
 import json
 import os
 import numpy as np
-from llm_sdk import Small_LLM_Model
+from llm_sdk.llm_sdk import Small_LLM_Model
 from src.data_loader import load_functions, load_tests, load_vocabulary
 from src.data_loader import create_clean_vocabulary
 from src.generator import create_prompt

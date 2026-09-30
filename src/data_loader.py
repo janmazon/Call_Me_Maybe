@@ -1,5 +1,5 @@
 from src.models import FunctionDefinition, TestPrompt
-from llm_sdk import Small_LLM_Model
+from llm_sdk.llm_sdk import Small_LLM_Model
 import json
 import sys
 import string
