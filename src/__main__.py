@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import time
 import numpy as np
 from llm_sdk.llm_sdk import Small_LLM_Model
 from src.data_loader import load_functions, load_tests, load_vocabulary
@@ -39,6 +40,7 @@ def main() -> None:
     inverted_vocab = load_vocabulary(model)
     clean_vocab = create_clean_vocabulary(inverted_vocab)
     output_data = []
+    start_time = time.time()
 
     for test in tests:
         print(f"Process: {test.prompt}")
@@ -71,18 +73,18 @@ def main() -> None:
                     generated_text.count('"') % 2 == 0):
                 break
 
-    try:
-        clean_text = generated_text.replace("Ġ", " ").replace("Ċ", "\n")
-        json_data = json.loads(clean_text)
-        result = FunctionCallResult(prompt=test.prompt,
-                                    name=chosen_function.name,
-                                    parameters=json_data)
-        output_data.append(result.model_dump())
-    except json.JSONDecodeError:
-        print(f"Error parsinng generated JSON for prompt: {test.prompt}.")
-        print(f"Problematic text: {generated_text}")
-    except KeyError as e:
-        print(f"Missing key {e} in JSON for prompt: {test.prompt}.")
+        try:
+            clean_text = generated_text.replace("Ġ", " ").replace("Ċ", "\n")
+            json_data = json.loads(clean_text)
+            result = FunctionCallResult(prompt=test.prompt,
+                                        name=chosen_function.name,
+                                        parameters=json_data)
+            output_data.append(result.model_dump())
+        except json.JSONDecodeError:
+            print(f"Error parsinng generated JSON for prompt: {test.prompt}.")
+            print(f"Problematic text: {generated_text}")
+        except KeyError as e:
+            print(f"Missing key {e} in JSON for prompt: {test.prompt}.")
 
     dir = os.path.dirname(args.output)
     if dir:
@@ -90,6 +92,10 @@ def main() -> None:
 
     with open(args.output, "w") as f:
         json.dump(output_data, f, indent=2)
+
+    elapsed_time = time.time() - start_time
+    minutes, seconds = divmod(elapsed_time, 60)
+    print(f"Total execution time: {int(minutes)}m {seconds:.2f}s")
 
 
 if __name__ == "__main__":
