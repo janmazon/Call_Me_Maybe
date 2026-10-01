@@ -1,0 +1,34 @@
+[project]
+name = "call-me-maybe"
+version = "0.1.0"
+description = "Introduction to function calling in LLMs"
+readme = "README.md"
+authors = [
+    { name = "jcamarer", email = "jcamarer@student.42urduliz.com" }
+]
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy>=1.24",
+    "pydantic>=2.13.5",
+    "torch>=2.0.0",
+    "transformers>=4.40.0",
+    "huggingface-hub>=0.20.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "flake8>=7.3.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "llm_sdk",
+]
+
+[tool.uv.sources]
+llm-sdk = { workspace = true, editable = true }
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
