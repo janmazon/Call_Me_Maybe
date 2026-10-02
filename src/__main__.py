@@ -76,16 +76,18 @@ def main() -> None:
         try:
             clean_text = generated_text.replace("Ġ", " ").replace("Ċ", "\n")
             json_data = json.loads(clean_text)
-            result = FunctionCallResult(prompt=test.prompt,
-                                        name=chosen_function.name,
-                                        parameters=json_data)
-            output_data.append(result.model_dump())
         except json.JSONDecodeError:
             print(f"Error parsinng generated JSON for prompt: {test.prompt}.")
             print(f"Problematic text: {generated_text}")
+            json_data = {}
         except KeyError as e:
             print(f"Missing key {e} in JSON for prompt: {test.prompt}.")
+            json_data = {}
 
+        result = FunctionCallResult(prompt=test.prompt,
+                                    name=chosen_function.name,
+                                    parameters=json_data)
+        output_data.append(result.model_dump())
     dir = os.path.dirname(args.output)
     if dir:
         os.makedirs(dir, exist_ok=True)

@@ -137,6 +137,8 @@ def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
                     return False
 
     remaining_text = remaining_text.strip()
+    if not remaining_text:
+        return True
     if remaining_text == "}":
         return True
 
