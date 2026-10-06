@@ -68,80 +68,78 @@ def select_function(
 
 
 def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
-    if proposed_text == "":
-        return True
-
     remaining_text = proposed_text.lstrip()
-    if not remaining_text.startswith("{"):
-        return "{".startswith(remaining_text)
-
-    remaining_text = remaining_text[1:].lstrip()
+    if not remaining_text:
+        return True
+    if "{".startswith(remaining_text) or remaining_text.startswith("{"):
+        remaining_text = remaining_text[1:].lstrip()
+    else:
+        return False
     if not remaining_text:
         return True
 
-    param_list = list(function.parameters.items())
-    for index, (param_name, param_def) in enumerate(param_list):
+    params = list(function.parameters.items())
+    for index, (param_name, param_def) in enumerate(params):
         if index == 0:
-            expected_struct = f'"{param_name}":'
+            expected_key = f'"{param_name}":'
         else:
-            expected_struct = f',"{param_name}":'
-
-        text_without_spaces = remaining_text.replace(" ", "")
-        if len(expected_struct) > len(text_without_spaces):
-            if not expected_struct.startswith(text_without_spaces):
-                return False
-            else:
-                return True
-
-        if not text_without_spaces.startswith(expected_struct):
+            expected_key = f',"{param_name}":'
+        if expected_key.startswith(remaining_text):
+            return True
+        elif remaining_text.startswith(expected_key):
+            remaining_text = remaining_text[len(expected_key):].lstrip()
+        else:
             return False
-
-        chars = 0
-        struct_chars = 0
-        for char in remaining_text:
-            chars += 1
-            if char != " ":
-                struct_chars += 1
-            if struct_chars == len(expected_struct):
-                break
-
-        remaining_text = remaining_text[chars:].lstrip()
         if not remaining_text:
             return True
 
         if param_def.type == "number":
-            partial_regex = r"^-?[0-9]*\.?[0-9]*$"
-            full_regex = r"^-?[0-9]+(\.[0-9]+)?$"
+            match = re.match(r"[^,}]+", remaining_text)
+            if match:
+                value = match.group(0)
+                full_match = r"^-?[0-9]+(\.[0-9]+)?$"
+                if len(value) == len(remaining_text):
+                    if re.fullmatch(r"^-?[0-9]*\.?[0-9]*$", value.strip()):
+                        return True
+                    else:
+                        return False
+                else:
+                    if not re.fullmatch(full_match, value.strip()):
+                        return False
+                    remaining_text = remaining_text[len(value):].lstrip()
+            else:
+                return False
 
+        elif param_def.type == "integer":
             match = re.match(r"[^,}]+", remaining_text)
             if match:
                 value = match.group(0)
                 if len(value) == len(remaining_text):
-                    return bool(re.fullmatch(partial_regex, value.strip()))
+                    if re.fullmatch(r"^-?[0-9]*$", value.strip()):
+                        return True
+                    else:
+                        return False
                 else:
-                    if not re.fullmatch(full_regex, value.strip()):
+                    if not re.fullmatch(r"^-?[0-9]+$", value.strip()):
                         return False
                     remaining_text = remaining_text[len(value):].lstrip()
             else:
                 return False
 
         elif param_def.type == "string":
-            match = re.match(r'"[^"]*"', remaining_text)
+            match = re.match(r'"([^"\\]|\\.)*"', remaining_text)
             if match:
                 value = match.group(0)
                 remaining_text = remaining_text[len(value):].lstrip()
             else:
-                if re.fullmatch(r'^"[^"]*$', remaining_text):
+                if re.fullmatch(r'^"([^"\\]|\\.)*$', remaining_text):
                     return True
                 else:
                     return False
 
     remaining_text = remaining_text.strip()
-    if not remaining_text:
+    if not remaining_text or remaining_text == "}":
         return True
-    if remaining_text == "}":
-        return True
-
     return False
 
 
