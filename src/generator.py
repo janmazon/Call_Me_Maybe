@@ -1,34 +1,20 @@
 from src.models import FunctionDefinition
+import json
 
 
 def create_prompt(functions: list[FunctionDefinition], prompt: str) -> str:
-    text = (
-        "You are an expert AI assistant that "
-        "extracts arguments for function calls.\n"
-        "You must output the function name immediately "
-        "followed by a JSON object with the parameters.\n\n"
-        "CRITICAL RULES:\n"
-        "1. Numbers MUST be written as floats with a decimal point.\n"
-        "2. Strings MUST NOT contain surrounding single quotes. "
-        "Remove them if present.\n"
-        "3. Regular expressions must be standard Python format, "
-        "without surrounding slashes (e.g. \\d+, not /\\d+/g).\n"
-        "4. Pay close attention to exact words requested and plurals.\n\n"
-        "EXAMPLES:\n"
-        "Question: Reverse the string 'testing'\n"
-        'FunctionCall: fn_reverse_string{"s":"testing"}\n\n'
-        'Question: Replace all numbers in "I have 2 cats" with DIGITS\n'
-        'FunctionCall: fn_substitute_string_with_regex{"source_string":"I '
-        'have 2 cats","regex":"\\\\d+","replacement":"DIGITS"}\n\n'
-        "Question: Greet batman\n"
-        'FunctionCall: fn_greet{"name":"batman"}\n\n'
-        "Available functions:\n"
+    functions_dict = []
+    for f in functions:
+        functions_dict.append(f.model_dump())
+    functions_text = json.dumps(functions_dict, indent=2)
+    instructions = ("Extract the parameters from the user's request and "
+                    "output a valid JSON object. Match the function "
+                    "signature exactly. For regular expressions, use "
+                    "pure Python syntax.")
+    final_prompt = (
+        f"<|im_start|>system\n{instructions}\n\n"
+        f"Available functions:\n{functions_text}<|im_end|>\n"
+        f"<|im_start|>user\n{prompt}<|im_end|>\n"
+        f"<|im_start|>assistant\n"
     )
-
-    for function in functions:
-        text += f"- {function.name}: {function.description}\n"
-        text += f"  Parameters: {function.parameters}\n"
-    text += f"\nUser question: {prompt}\n"
-    text += "FunctionCall: "
-
-    return text
+    return final_prompt

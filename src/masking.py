@@ -97,14 +97,13 @@ def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
             match = re.match(r"[^,}]+", remaining_text)
             if match:
                 value = match.group(0)
-                full_match = r"^-?[0-9]+(\.[0-9]+)?$"
                 if len(value) == len(remaining_text):
                     if re.fullmatch(r"^-?[0-9]*\.?[0-9]*$", value.strip()):
                         return True
                     else:
                         return False
                 else:
-                    if not re.fullmatch(full_match, value.strip()):
+                    if not re.fullmatch(r"^-?[0-9]+\.[0-9]+$", value.strip()):
                         return False
                     remaining_text = remaining_text[len(value):].lstrip()
             else:
@@ -127,12 +126,21 @@ def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
                 return False
 
         elif param_def.type == "string":
-            match = re.match(r'"([^"\\]|\\.)*"', remaining_text)
+            if param_name == "regex":
+                pattern_complete = r'"([^"/\\]|\\.)*"'
+                pattern_partial = r'^"([^"/\\]|\\.)*$'
+            elif param_name == "name":
+                pattern_complete = r'"[a-zA-Z0-9]*"'
+                pattern_partial = r'^"[a-zA-Z0-9]*$'
+            else:
+                pattern_complete = r'"(?!\'|:)([^"\\]|\\.)*"'
+                pattern_partial = r'^"(?!\'|:)([^"\\]|\\.)*$'
+            match = re.match(pattern_complete, remaining_text)
             if match:
                 value = match.group(0)
                 remaining_text = remaining_text[len(value):].lstrip()
             else:
-                if re.fullmatch(r'^"([^"\\]|\\.)*$', remaining_text):
+                if re.fullmatch(pattern_partial, remaining_text):
                     return True
                 else:
                     return False
