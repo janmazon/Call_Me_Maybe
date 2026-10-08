@@ -50,7 +50,7 @@ def process_test(test: TestPrompt, functions: list[FunctionDefinition],
         clean_text = generated_text.replace("Ġ", " ").replace("Ċ", "\n")
         json_data = json.loads(clean_text)
     except json.JSONDecodeError:
-        print(f"Error parsinng generated JSON for prompt: {test.prompt}.")
+        print(f"Error parsing generated JSON for prompt: {test.prompt}.")
         json_data = {}
     except KeyError as e:
         print(f"Missing key {e} in JSON for prompt: {test.prompt}.")
