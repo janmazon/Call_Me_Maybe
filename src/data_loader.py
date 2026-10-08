@@ -59,9 +59,6 @@ def load_tests(file_path: str) -> list[TestPrompt]:
             if isinstance(content, list):
                 for i in content:
                     prompts.append(TestPrompt.model_validate(i))
-                if not prompts:
-                    print("Warning: No tests found in file.")
-                    sys.exit(0)
             else:
                 print(f"Error: Expected a list in '{file_path}'.")
                 sys.exit(1)
