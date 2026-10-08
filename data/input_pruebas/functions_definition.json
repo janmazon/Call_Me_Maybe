@@ -1,0 +1,35 @@
+[
+  {
+    "name": "fn_add_numbers",
+    "description": "Add two numbers together.",
+    "parameters": {
+      "a": { "type": "number" },
+      "b": { "type": "number" }
+    },
+    "returns": { "type": "number" }
+  },
+  {
+    "name": "fn_greet",
+    "description": "Greet someone.",
+    "parameters": {
+      "name": { "type": "string" }
+    },
+    "returns": { "type": "string" }
+  },
+  {
+    "name": "fn_reverse_string",
+    "description": "Reverse a string.",
+    "parameters": {
+      "s": { "type": "string" }
+    },
+    "returns": { "type": "string" }
+  },
+  {
+    "name": "fn_set_flag",
+    "description": "Enable or disable a feature.",
+    "parameters": {
+      "flag": { "type": "boolean" }
+    },
+    "returns": { "type": "boolean" }
+  }
+]
