@@ -125,6 +125,23 @@ def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
             else:
                 return False
 
+        elif param_def.type in ["bool", "boolean"]:
+            match = re.match(r"[^,}]+", remaining_text)
+            if match:
+                value = match.group(0)
+                fullmatch = r"^(t|tr|tru|true|f|fa|fal|fals|false)$"
+                if len(value) == len(remaining_text):
+                    if re.fullmatch(fullmatch, value.strip()):
+                        return True
+                    else:
+                        return False
+                else:
+                    if not re.fullmatch(r"^(true|false)$", value.strip()):
+                        return False
+                    remaining_text = remaining_text[len(value):].lstrip()
+            else:
+                return False
+
         elif param_def.type == "string":
             if param_name == "regex":
                 pattern_complete = r'"([^"/\\]|\\.)*"'

@@ -13,6 +13,20 @@ def load_functions(file_path: str) -> list[FunctionDefinition]:
             if isinstance(content, list):
                 for i in content:
                     functions.append(FunctionDefinition.model_validate(i))
+                if not functions:
+                    print(f"Error: The functions array in '{file_path}' "
+                          f"is empty.")
+                    sys.exit(1)
+                allowed_types = ["string", "integer", "number",
+                                 "bool", "boolean"]
+                for function in functions:
+                    for param_name, param_def in function.parameters.items():
+                        if param_def.type not in allowed_types:
+                            print(f"Error: Function '{function.name}' has an "
+                                  f"unsupported parameter type "
+                                  f"'{param_def.type}' for '{param_name}'. \n"
+                                  f"Allowed types are: {allowed_types}.")
+                            sys.exit(1)
             else:
                 print(f"Error: Expected a list in '{file_path}'.")
                 sys.exit(1)
@@ -22,6 +36,13 @@ def load_functions(file_path: str) -> list[FunctionDefinition]:
         sys.exit(1)
     except json.JSONDecodeError:
         print(f"Error: File '{file_path}' contains invalid JSON.")
+        sys.exit(1)
+    except IsADirectoryError:
+        print(f"Error: '{file_path}' is a directory, not a file.")
+        sys.exit(1)
+    except ValueError:
+        print(f"Error: Invalid data format in '{file_path}'. "
+              f"Missing or invorrect fields.")
         sys.exit(1)
     except Exception as e:
         print(f"Error: Unexpected error while loading '{file_path}': {e}")
@@ -38,6 +59,9 @@ def load_tests(file_path: str) -> list[TestPrompt]:
             if isinstance(content, list):
                 for i in content:
                     prompts.append(TestPrompt.model_validate(i))
+                if not prompts:
+                    print("Warning: No tests found in file.")
+                    sys.exit(0)
             else:
                 print(f"Error: Expected a list in '{file_path}'.")
                 sys.exit(1)
@@ -47,6 +71,13 @@ def load_tests(file_path: str) -> list[TestPrompt]:
         sys.exit(1)
     except json.JSONDecodeError:
         print(f"Error: File '{file_path}' contains invalid JSON.")
+        sys.exit(1)
+    except IsADirectoryError:
+        print(f"Error: '{file_path}' is a directory, not a file.")
+        sys.exit(1)
+    except ValueError:
+        print(f"Error: Invalid data format in '{file_path}'. "
+              f"Missing or invorrect fields.")
         sys.exit(1)
     except Exception as e:
         print(f"Error: Unexpected error while loading '{file_path}': {e}")
