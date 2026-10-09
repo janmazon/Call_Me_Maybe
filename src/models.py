@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from typing import Any
 
 
@@ -25,11 +25,37 @@ class FunctionDefinition(BaseModel):
     parameters: dict[str, ParameterDefinition]
     returns: ReturnDefinition
 
+    @field_validator("parameters")
+    @classmethod
+    def validate_parameters_names(cls, value: dict[str, ParameterDefinition]
+                                  ) -> dict[str, ParameterDefinition]:
+        """
+        Checks that parameter names are not empty.
+
+        Makes sure the keys in the parameters dictionary have real text
+        and are not just empty strings or spaces.
+
+        Args:
+            value (dict[str, ParameterDefinition]):
+            The parameters dictionary to check.
+
+        Returns:
+            dict[str, ParameterDefinition]: The checked parameters dictionary.
+
+        Raises:
+            ValueError: If any key is empty or only has spaces.
+        """
+
+        for key in value.keys():
+            if not key.strip():
+                raise ValueError
+        return value
+
 
 class TestPrompt(BaseModel):
     """Model to represent a user test prompt."""
 
-    prompt: str
+    prompt: str = Field(..., min_length=1)
 
 
 class FunctionCallResult(BaseModel):
