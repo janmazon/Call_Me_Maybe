@@ -2,6 +2,16 @@ import argparse
 
 
 def parse_arguments() -> argparse.Namespace:
+    """
+    Sets up and reads command line arguments.
+
+    It handles the paths for input files (functions and tests) and the
+    output file. It includes default values to make it easy to use.
+
+    Returns:
+        argparse.Namespace: An object containing the read arguments.
+    """
+
     parser = argparse.ArgumentParser(description="LLM function calling tool "
                                      "using constrained decoding")
     parser.add_argument("--functions_definition",

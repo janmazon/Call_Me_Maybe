@@ -6,6 +6,19 @@ import re
 
 def get_allowed_tokens(candidates: list[list[int]],
                        generated_tokens: list[int]) -> list[int]:
+    """
+    Finds out which tokens are allowed next when picking a function.
+
+    It compares the tokens made so far with the list of possible valid tokens.
+
+    Args:
+        candidates (list[list[int]]): List of valid token sequences.
+        generated_tokens (list[int]): Tokens made so far.
+
+    Returns:
+        list[int]: A list of token IDs allowed for the next step.
+    """
+
     allowed_token_ids: list[int] = []
     position = len(generated_tokens)
     for candidate in candidates:
@@ -17,6 +30,20 @@ def get_allowed_tokens(candidates: list[list[int]],
 
 
 def apply_logit_mask(logits: list[Any], allowed_token_ids: list[int]) -> int:
+    """
+    Applies a math mask to the model's probabilities.
+
+    It finds and returns the token ID with the highest score, but only looks
+    at tokens allowed by the rules.
+
+    Args:
+        logits (list[Any]): Raw probabilities from the model.
+        allowed_token_ids (list[int]): IDs of tokens allowed by the rules.
+
+    Returns:
+        int: The winning token ID for the model to generate.
+    """
+
     if logits and isinstance(logits[0], list):
         last_logits = logits[-1]
     else:
@@ -39,6 +66,21 @@ def select_function(
         functions: list[FunctionDefinition],
         input_ids: list[int],
         ) -> tuple[FunctionDefinition, list[int]]:
+    """
+    Forces the model to output the exact name of an available function.
+
+    It uses constrained decoding to stop the model from making up names.
+
+    Args:
+        model (Small_LLM_Model): The language model object.
+        functions (list[FunctionDefinition]): The candidate functions.
+        input_ids (list[int]): IDs of the first tokens from the prompt.
+
+    Returns:
+        tuple[FunctionDefinition, list[int]]: The chosen function and the
+        updated list of tokens with the name added.
+    """
+
     candidates: list[list[int]] = []
     function_by_tokens: dict[tuple[int, ...], FunctionDefinition] = {}
     current_input_ids = list(input_ids)
@@ -68,6 +110,20 @@ def select_function(
 
 
 def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
+    """
+    Checks if the text being built follows JSON rules.
+
+    It uses text patterns (regex) for numbers, booleans, and strings to make
+    sure keys, quotes, and values are 100% correct.
+
+    Args:
+        function (FunctionDefinition): The function with the needed rules.
+        proposed_text (str): The string built so far.
+
+    Returns:
+        bool: True if the text follows the rules, False if it breaks them.
+    """
+
     remaining_text = proposed_text.lstrip()
     if not remaining_text:
         return True
@@ -165,6 +221,21 @@ def check_json_rules(function: FunctionDefinition, proposed_text: str) -> bool:
 def get_allowed_tokens_for_args(function: FunctionDefinition,
                                 generated_tokens: list[int],
                                 inverted_vocab: dict[int, str]) -> list[int]:
+    """
+    Gets all vocabulary tokens that keep the JSON valid.
+
+    It tests all clean tokens by adding them to the current text and checking
+    them against the rules.
+
+    Args:
+        function (FunctionDefinition): The rules to follow.
+        generated_tokens (list[int]): Parameter tokens already made.
+        inverted_vocab (dict[int, str]): Dictionary of tokens to text.
+
+    Returns:
+        list[int]: IDs of the tokens the model is allowed to generate.
+    """
+
     generated_text = ""
     for num in generated_tokens:
         generated_text += inverted_vocab[num]

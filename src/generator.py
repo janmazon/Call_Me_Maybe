@@ -3,6 +3,20 @@ import json
 
 
 def create_prompt(functions: list[FunctionDefinition], prompt: str) -> str:
+    """
+    Creates the final formatted text to send to the model.
+
+    It uses the model's special chat format to include system instructions,
+    available functions in JSON format, and the user's message.
+
+    Args:
+        functions (list[FunctionDefinition]): List of available functions.
+        prompt (str): The text written by the user.
+
+    Returns:
+        str: The full text formatted with special tokens.
+    """
+
     functions_dict = []
     for f in functions:
         functions_dict.append(f.model_dump())

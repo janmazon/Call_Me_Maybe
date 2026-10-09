@@ -6,6 +6,20 @@ import string
 
 
 def load_functions(file_path: str) -> list[FunctionDefinition]:
+    """
+    Loads and checks function definitions from a JSON file.
+
+    Args:
+        file_path (str): The path to the JSON file with the definitions.
+
+    Returns:
+        list[FunctionDefinition]: A list of checked function objects.
+
+    Raises:
+        SystemExit: If the file is missing, the JSON is bad, required fields
+        are missing, or data types are not allowed.
+    """
+
     try:
         with open(file_path, "r") as f:
             content = json.load(f)
@@ -52,6 +66,20 @@ def load_functions(file_path: str) -> list[FunctionDefinition]:
 
 
 def load_tests(file_path: str) -> list[TestPrompt]:
+    """
+    Loads and checks user test prompts from a JSON file.
+
+    Args:
+        file_path (str): The path to the JSON file with the user tests.
+
+    Returns:
+        list[TestPrompt]: A list of checked test objects.
+
+    Raises:
+        SystemExit: If the file is missing, is a folder, or the JSON format
+        is wrong.
+    """
+
     try:
         with open(file_path, "r") as f:
             content = json.load(f)
@@ -84,6 +112,17 @@ def load_tests(file_path: str) -> list[TestPrompt]:
 
 
 def load_vocabulary(model: Small_LLM_Model) -> dict[int, str]:
+    """
+    Loads the model's vocabulary and makes a reversed dictionary.
+
+    Args:
+        model (Small_LLM_Model): The model object from the SDK.
+
+    Returns:
+        dict[int, str]: A dictionary where keys are token IDs and values
+        are strings.
+    """
+
     vocab_path = model.get_path_to_vocab_file()
     with open(vocab_path, "r") as f:
         vocab = json.load(f)
@@ -96,6 +135,19 @@ def load_vocabulary(model: Small_LLM_Model) -> dict[int, str]:
 
 
 def create_clean_vocabulary(inverted_vocab: dict[int, str]) -> dict[int, str]:
+    """
+    Filters the vocabulary to keep only safe and allowed tokens.
+
+    It keeps only basic text, numbers, punctuation, and spaces. This stops
+    the model from using bad characters like emojis or other languages.
+
+    Args:
+        inverted_vocab (dict[int, str]): The original reversed vocabulary.
+
+    Returns:
+        dict[int, str]: The cleaned vocabulary.
+    """
+
     allowed_chars: str = (string.ascii_letters + string.digits +
                           string.punctuation + " \n\t" + "Ġ" + "Ċ")
     clean_vocab: dict[int, str] = {}

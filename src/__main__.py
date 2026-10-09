@@ -16,6 +16,24 @@ from src.models import FunctionCallResult, TestPrompt, FunctionDefinition
 def process_test(test: TestPrompt, functions: list[FunctionDefinition],
                  model: Small_LLM_Model, clean_vocab: dict[int, str],
                  inverted_vocab: dict[int, str]) -> dict[str, Any]:
+    """
+    Runs a single test using constrained decoding.
+
+    It forces the model to choose a real function and create parameters,
+    making sure the JSON structure is perfect token by token.
+
+    Args:
+        test (TestPrompt): The prompt to test.
+        functions (list[FunctionDefinition]): The available functions.
+        model (Small_LLM_Model): The language model object.
+        clean_vocab (dict[int, str]): The safe and filtered vocabulary.
+        inverted_vocab (dict[int, str]): The original reversed vocabulary.
+
+    Returns:
+        dict[str, Any]: A dictionary with the original prompt, the chosen
+        function, and the extracted parameters.
+    """
+
     print(f"Process: {test.prompt}")
     prompt_tokens = create_prompt(functions, test.prompt)
     input_ids = model.encode(prompt_tokens).tolist()[0]
@@ -63,6 +81,20 @@ def process_test(test: TestPrompt, functions: list[FunctionDefinition],
 
 
 def save_output(output_data: list[dict[str, Any]], output_path: str) -> None:
+    """
+    Saves the final results into a JSON file.
+
+    It creates the output folder if it does not exist.
+
+    Args:
+        output_data (list[dict[str, Any]]): A list of dictionaries with
+        the results.
+        output_path (str): The full path to save the JSON file.
+
+    Raises:
+        SystemExit: If there are permission or operating system errors.
+    """
+
     dir = os.path.dirname(output_path)
     try:
         if dir:
@@ -78,6 +110,14 @@ def save_output(output_data: list[dict[str, Any]], output_path: str) -> None:
 
 
 def main() -> None:
+    """
+    The main entry point of the program.
+
+    It controls loading arguments, data, and vocabulary. It runs the loop
+    for the tests and saves the final results. It also stops safely if you
+    press Ctrl+C.
+    """
+
     try:
         args = parse_arguments()
         functions = load_functions(args.functions_definition)
